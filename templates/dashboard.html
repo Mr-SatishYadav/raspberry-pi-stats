@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspberry Pi Stats</title>
+    <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+
+        function updateStats (data)
+        {
+            document.getElementById("cpu").innerText = `${ data.cpu_usage }%`;
+            document.getElementById("memory").innerText = `${ data.memory_usage }%`;
+            document.getElementById("disk").innerText = `${ data.disk_usage }%`;
+            document.getElementById("temp").innerText = `${ data.temperature }°C`;
+        }
+
+        socket.on("update_stats", updateStats);
+
+        setInterval(() =>
+        {
+            socket.emit("request_stats");
+        }, 1000); // Request stats every second
+    </script>
+</head>
+
+<body>
+    <h1>Raspberry Pi Live Stats</h1>
+    <p>CPU Usage: <span id="cpu">Loading...</span></p>
+    <p>Memory Usage: <span id="memory">Loading...</span></p>
+    <p>Disk Usage: <span id="disk">Loading...</span></p>
+    <p>Temperature: <span id="temp">Loading...</span></p>
+</body>
+
+</html>
