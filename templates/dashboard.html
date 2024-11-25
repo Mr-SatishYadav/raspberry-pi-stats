@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RPi-stats</title>
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"> -->
-    <link rel="stylesheet" href="../static/css/styles.css">
-    <!-- <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- <link rel="stylesheet" href="../static/css/styles.css"> -->
+    <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
     <script>
         // const socket = io();
 
@@ -60,11 +60,11 @@
             }
         }
 
-        // socket.on("update_stats", updateStats);
+        socket.on("update_stats", updateStats);
 
         setInterval(() =>
         {
-            // socket.emit("request_stats");
+            socket.emit("request_stats");
             updateStats({
                 cpu_usage: Math.floor(Math.random() * 101),
                 memory_usage: Math.floor(Math.random() * 101),
@@ -81,8 +81,7 @@
             <div class="page-title-wrapper">
                 <div class="page-title-heading">
                     <div class="page-title-icon">
-                        <image width='100%' src='{{ url_for(' static', filename='images/raspberry-pi.png' ) }}' />
-                        <!-- <image width='100%' src='../static/images/raspberry-pi.png'' /> -->
+                        <image width='100%' src='{{ url_for('static', filename='images/raspberry-pi.png' ) }}' />
                     </div>
                     <div>
                         <h1 class=' h3'>Raspberry PI stats</h1>
@@ -197,7 +196,7 @@
 
         </div>
     </main>
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <!-- <script src="{{ url_for('static', filename='js/scripts.js') }}"></script> -->
 </body>
 
 </html>

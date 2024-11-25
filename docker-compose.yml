@@ -7,8 +7,9 @@ services:
       - "5000:5000"
     volumes:
       - .:/app  # Mount the current directory into the container
-      - /app/__pycache__/  # Optional: prevent caching on the host system
+      - /app/__pycache__/  # Prevent pycache from being cached on the host system
     environment:
-      FLASK_APP: app.py  # Specify your Flask app's entry point
-      FLASK_ENV: development  # Enable development mode (includes hot-reloading)
-    command: watchmedo auto-restart --patterns="*.py" -- flask run --host=0.0.0.0 --port=5000
+      FLASK_APP: app.py  # Flask app entry point
+      FLASK_ENV: development  # Enable development mode for hot-reloading
+      FLASK_DEBUG: 1
+    command: flask run --host=0.0.0.0 --port=5000 --reload --debug
