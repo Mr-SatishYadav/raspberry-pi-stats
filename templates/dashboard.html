@@ -5,8 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RPi-stats</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <!-- <link rel="stylesheet" href="../static/css/styles.css"> -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/static/favicon/site.webmanifest">
+    <link rel="stylesheet" href="/static/css/styles.css">
     <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
     <script>
         const socket = io();
@@ -27,31 +30,35 @@
         function updateStats (data)
         {
             const stats = [
-                ['cpu_usage', 'cpu', 'cpu-progress', [25, 50, 75]],
-                ['temperature', 'temp', 'temp-progress', [35, 45, 55]],
-                ['memory_usage', 'memory', 'memory-progress', [60, 70, 90]],
-                ['disk_usage', 'disk', 'disk-progress', [70, 80, 90]]
+                [ 'cpu_usage', 'cpu', 'cpu-widget', 'cpu-progress', [ 25, 50, 75 ] ],
+                [ 'temperature', 'temp', 'tmp-widget', 'temp-progress', [ 35, 45, 55 ] ],
+                [ 'memory_usage', 'memory', 'mem-widget', 'memory-progress', [ 60, 70, 90 ] ],
+                [ 'disk_usage', 'disk', 'dsk-widget', 'disk-progress', [ 70, 80, 90 ] ]
             ];
 
             // Cache DOM queries
-            const elements = stats.map(([_, elemId, progressId]) => ({
+            const elements = stats.map(([ _, elemId, cardId, progressId ]) => ({
                 value: document.getElementById(elemId),
+                card: document.getElementById(cardId),
                 progress: document.getElementById(progressId)
             }));
 
             // Update all stats in one loop
-            for(let i = 0; i < stats.length; i++) {
-                const value = data[stats[i][0]];
-                if (value !== undefined) {
-                    const color = getColorClass(value, stats[i][3]);
-                    const elem = elements[i];
-                    
+            stats.forEach((v, i) =>
+            {
+                const value = data[ stats[ i ][ 0 ] ];
+                const elem = elements[ i ];
+                if (value !== 'N/A') {
+                    const color = getColorClass(value, stats[ i ][ 4 ]);
+                    elem.card.style.display = 'unset';
                     elem.progress.ariaValueNow = value;
-                    elem.progress.style.cssText = `width: ${value}%; background-color: ${color}`;
+                    elem.progress.style.cssText = `width: ${ value }%; background-color: ${ color }`;
                     elem.value.style.color = color;
                     elem.value.textContent = value + '%';
+                } else {
+                    elem.card.style.display = 'none';
                 }
-            }
+            });
         }
 
         socket.on("update_stats", updateStats);
@@ -59,12 +66,6 @@
         setInterval(() =>
         {
             socket.emit("request_stats");
-            // updateStats({
-            //     cpu_usage: Math.floor(Math.random() * 101),
-            //     memory_usage: Math.floor(Math.random() * 101),
-            //     disk_usage: Math.floor(Math.random() * 101),
-            //     temperature: Math.floor(Math.random() * 101)
-            // });
         }, 1000); // Request stats every second
     </script>
 </head>
@@ -75,7 +76,7 @@
             <div class="page-title-wrapper">
                 <div class="page-title-heading">
                     <div class="page-title-icon">
-                        <image width='100%' src='{{ url_for('static', filename='images/raspberry-pi.png' ) }}' />
+                        <image width='100%' src="/static/images/raspberry-pi.png" />
                     </div>
                     <div>
                         <h1 class=' h3'>Raspberry PI Stats</h1>
@@ -87,7 +88,7 @@
     </header>
     <main class="container">
         <div class="row">
-            <div class="col-xl-6">
+            <div class="col-xl-6" id='cpu-widget'>
                 <div class="card mb-3 widget-content">
                     <div class="widget-content-outer">
                         <div class="widget-content-wrapper">
@@ -112,7 +113,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-6">
+            <div class="col-xl-6" id='tmp-widget'>
                 <div class="card mb-3 widget-content">
                     <div class="widget-content-outer">
                         <div class="widget-content-wrapper">
@@ -137,7 +138,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-6">
+            <div class="col-xl-6" id='mem-widget'>
                 <div class="card mb-3 widget-content">
                     <div class="widget-content-outer">
                         <div class="widget-content-wrapper">
@@ -162,7 +163,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-6">
+            <div class="col-xl-6" id='dsk-widget'>
                 <div class="card mb-3 widget-content">
                     <div class="widget-content-outer">
                         <div class="widget-content-wrapper">
@@ -190,7 +191,7 @@
 
         </div>
     </main>
-    <!-- <script src="{{ url_for('static', filename='js/scripts.js') }}"></script> -->
+    <!-- <script src="/static/favicon/scripts.js') }}"></script> -->
 </body>
 
 </html>
