@@ -9,7 +9,7 @@
     <!-- <link rel="stylesheet" href="../static/css/styles.css"> -->
     <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
     <script>
-        // const socket = io();
+        const socket = io();
 
         function getColorClass (value, range = [ 25, 50, 75 ])
         {
@@ -26,37 +26,31 @@
 
         function updateStats (data)
         {
-            // Set CPU stats
-            if (data.cpu_usage !== undefined) {
-                document.querySelector('#cpu-progress').ariaValueNow = data.cpu_usage;
-                document.querySelector('#cpu-progress').style.width = `${ data.cpu_usage }%`;
-                document.querySelector('#cpu-progress').style.backgroundColor = getColorClass(data.cpu_usage, [ 25, 50, 75 ]);
-                document.querySelector('#cpu').style.color = getColorClass(data.cpu_usage, [ 25, 50, 75 ]);
-                document.querySelector('#cpu').innerText = `${ data.cpu_usage }%`;
-            }
-            // Set TEMP stats
-            if (data.temperature !== undefined) {
-                document.querySelector('#temp-progress').ariaValueNow = data.temperature;
-                document.querySelector('#temp-progress').style.width = `${ data.temperature }%`;
-                document.querySelector('#temp-progress').style.backgroundColor = getColorClass(data.temperature, [ 35, 45, 55 ]);
-                document.querySelector('#temp').style.color = getColorClass(data.temperature, [ 35, 45, 55 ]);
-                document.querySelector('#temp').innerText = `${ data.temperature }%`;
-            }
-            // Set MEMORY stats
-            if (data.memory_usage !== undefined) {
-                document.querySelector('#memory-progress').ariaValueNow = data.memory_usage;
-                document.querySelector('#memory-progress').style.width = `${ data.memory_usage }%`;
-                document.querySelector('#memory-progress').style.backgroundColor = getColorClass(data.memory_usage, [ 60, 70, 90 ]);
-                document.querySelector('#memory').style.color = getColorClass(data.memory_usage, [ 60, 70, 90 ]);
-                document.querySelector('#memory').innerText = `${ data.memory_usage }%`;
-            }
-            // Set DISK stats
-            if (data.disk_usage !== undefined) {
-                document.querySelector('#disk-progress').ariaValueNow = data.disk_usage;
-                document.querySelector('#disk-progress').style.width = `${ data.disk_usage }%`;
-                document.querySelector('#disk-progress').style.backgroundColor = getColorClass(data.disk_usage, [ 70, 80, 90 ]);
-                document.querySelector('#disk').innerText = `${ data.disk_usage }%`;
-                document.querySelector('#disk').style.color = getColorClass(data.disk_usage, [ 70, 80, 90 ]);
+            const stats = [
+                ['cpu_usage', 'cpu', 'cpu-progress', [25, 50, 75]],
+                ['temperature', 'temp', 'temp-progress', [35, 45, 55]],
+                ['memory_usage', 'memory', 'memory-progress', [60, 70, 90]],
+                ['disk_usage', 'disk', 'disk-progress', [70, 80, 90]]
+            ];
+
+            // Cache DOM queries
+            const elements = stats.map(([_, elemId, progressId]) => ({
+                value: document.getElementById(elemId),
+                progress: document.getElementById(progressId)
+            }));
+
+            // Update all stats in one loop
+            for(let i = 0; i < stats.length; i++) {
+                const value = data[stats[i][0]];
+                if (value !== undefined) {
+                    const color = getColorClass(value, stats[i][3]);
+                    const elem = elements[i];
+                    
+                    elem.progress.ariaValueNow = value;
+                    elem.progress.style.cssText = `width: ${value}%; background-color: ${color}`;
+                    elem.value.style.color = color;
+                    elem.value.textContent = value + '%';
+                }
             }
         }
 
@@ -65,12 +59,12 @@
         setInterval(() =>
         {
             socket.emit("request_stats");
-            updateStats({
-                cpu_usage: Math.floor(Math.random() * 101),
-                memory_usage: Math.floor(Math.random() * 101),
-                disk_usage: Math.floor(Math.random() * 101),
-                temperature: Math.floor(Math.random() * 101)
-            });
+            // updateStats({
+            //     cpu_usage: Math.floor(Math.random() * 101),
+            //     memory_usage: Math.floor(Math.random() * 101),
+            //     disk_usage: Math.floor(Math.random() * 101),
+            //     temperature: Math.floor(Math.random() * 101)
+            // });
         }, 1000); // Request stats every second
     </script>
 </head>
@@ -84,7 +78,7 @@
                         <image width='100%' src='{{ url_for('static', filename='images/raspberry-pi.png' ) }}' />
                     </div>
                     <div>
-                        <h1 class=' h3'>Raspberry PI stats</h1>
+                        <h1 class=' h3'>Raspberry PI Stats</h1>
                         <div class="page-title-subheading">View live statistics of the Raspberry Pi server</div>
                     </div>
                 </div>
