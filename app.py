@@ -10,11 +10,21 @@ socketio = SocketIO(app)
 prev_net = {"bytes_sent": 0, "bytes_recv": 0, "timestamp": time.time()}
 
 def get_drive_temp_and_usage(drive=None):
-    # Try to get drive temperature using smartctl (if available)
+    # Only works on Linux (Raspberry Pi OS Lite)
+    import os
     temp = "N/A"
     usage = "N/A"
-    # On Windows, smartctl may not be available, so skip temp
-    if drive is not None:
+    # Find the first non-root, non-loop block device (e.g., /dev/sda, /dev/sdb)
+    if drive is None:
+        try:
+            for p in psutil.disk_partitions():
+                if p.device.startswith("/dev/sd") and p.device != "/dev/root":
+                    drive = p.device
+                    break
+        except Exception:
+            drive = None
+    # Try to get drive temperature using smartctl (if available)
+    if drive is not None and os.name == "posix":
         try:
             result = subprocess.run(
                 ["smartctl", "-A", drive],
@@ -39,11 +49,9 @@ def get_drive_temp_and_usage(drive=None):
             temp = "N/A"
     # Try to get usage for the drive (if mounted)
     try:
-        # On Windows, external drives are usually like D:\, E:\, etc.
-        # We'll try to get usage for all mounted partitions except C:\
         partitions = psutil.disk_partitions()
         for p in partitions:
-            if p.device != 'C:\\' and (drive is None or p.device.startswith(drive)):
+            if drive is not None and p.device == drive:
                 usage = psutil.disk_usage(p.mountpoint).percent
                 break
     except Exception:
