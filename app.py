@@ -1,18 +1,89 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 import psutil
+import subprocess
+import time
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
+prev_net = {"bytes_sent": 0, "bytes_recv": 0, "timestamp": time.time()}
+
+def get_drive_temp_and_usage(drive=None):
+    # Try to get drive temperature using smartctl (if available)
+    temp = "N/A"
+    usage = "N/A"
+    # On Windows, smartctl may not be available, so skip temp
+    if drive is not None:
+        try:
+            result = subprocess.run(
+                ["smartctl", "-A", drive],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=2
+            )
+            for line in result.stdout.splitlines():
+                if (
+                    "Temperature_Celsius" in line or
+                    "Temperature_Internal" in line or
+                    "Drive Temperature" in line
+                ):
+                    parts = line.split()
+                    for part in reversed(parts):
+                        if part.isdigit():
+                            temp = part
+                            break
+                    break
+        except Exception:
+            temp = "N/A"
+    # Try to get usage for the drive (if mounted)
+    try:
+        # On Windows, external drives are usually like D:\, E:\, etc.
+        # We'll try to get usage for all mounted partitions except C:\
+        partitions = psutil.disk_partitions()
+        for p in partitions:
+            if p.device != 'C:\\' and (drive is None or p.device.startswith(drive)):
+                usage = psutil.disk_usage(p.mountpoint).percent
+                break
+    except Exception:
+        usage = "N/A"
+    return temp, usage
+
+def get_network_speeds():
+    global prev_net
+    counters = psutil.net_io_counters()
+    now = time.time()
+    elapsed = now - prev_net["timestamp"] if prev_net["timestamp"] else 1
+    upload_speed = (counters.bytes_sent - prev_net["bytes_sent"]) / elapsed
+    download_speed = (counters.bytes_recv - prev_net["bytes_recv"]) / elapsed
+    prev_net = {
+        "bytes_sent": counters.bytes_sent,
+        "bytes_recv": counters.bytes_recv,
+        "timestamp": now
+    }
+    return upload_speed, download_speed
+
 def get_stats():
     temperatures = psutil.sensors_temperatures().get('cpu_thermal', [])
     cpu_temp = temperatures[0].current if temperatures else 'N/A'
+    # Try to find a non-system drive (not C:) for Windows
+    drive_letter = None
+    for p in psutil.disk_partitions():
+        if p.device != 'C:\\':
+            drive_letter = p.device
+            break
+    drive_temp, drive_usage = get_drive_temp_and_usage(drive_letter)
+    upload_speed, download_speed = get_network_speeds()
     return {
         "cpu_usage": psutil.cpu_percent(interval=1),
         "memory_usage": psutil.virtual_memory().percent,
         "disk_usage": psutil.disk_usage('/').percent,
-        "temperature": f"{cpu_temp:.2f}" if isinstance(cpu_temp, (int, float)) else cpu_temp
+        "temperature": f"{cpu_temp:.2f}" if isinstance(cpu_temp, (int, float)) else cpu_temp,
+        "drive_temperature": drive_temp,
+        "drive_usage": drive_usage,
+        "upload_speed": f"{upload_speed/1024:.2f} KB/s",
+        "download_speed": f"{download_speed/1024:.2f} KB/s"
     }
 
 @app.route("/")
