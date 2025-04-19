@@ -267,6 +267,30 @@ h1 {
     display: block
 }
 
+.widget-numbers.small-number {
+    font-size: 1.1rem;
+    color: var(--info);
+    margin-top: 0.2rem;
+}
+
+.widget-numbers.net-number {
+    font-size: 1.1rem;
+    color: var(--teal);
+    margin-top: 0.2rem;
+    display: block;
+}
+
+#drive-widget .widget-content-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+#net-widget .widget-content-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
 
 .widget-content .widget-progress-wrapper {
     margin-top: 1rem
