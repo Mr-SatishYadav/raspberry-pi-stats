@@ -2,4 +2,4 @@ flask
 flask-socketio
 eventlet
 psutil
-watchdog
+gunicorn
