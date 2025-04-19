@@ -5,8 +5,8 @@ services:
     build: .
     ports:
       - "5000:5000"
-    volumes:
-      - .:/app  # Mount the current directory into the container
+    # volumes:
+    #   - .:/app  # Mount the current directory into the container (disabled for production)
     environment:
       FLASK_APP: app.py  # Flask app entry point
       FLASK_ENV: production  # Set to production
