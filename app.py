@@ -12,7 +12,7 @@ def get_stats():
         "cpu_usage": psutil.cpu_percent(interval=1),
         "memory_usage": psutil.virtual_memory().percent,
         "disk_usage": psutil.disk_usage('/').percent,
-        "temperature": cpu_temp
+        "temperature": f"{cpu_temp:.2f}" if isinstance(cpu_temp, (int, float)) else cpu_temp
     }
 
 @app.route("/")
