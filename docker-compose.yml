@@ -1,12 +1,11 @@
-version: '3.9'
 services:
   pi-stats:
     restart: always
     build: .
     ports:
       - "5000:5000"
-    # volumes:
-    #   - .:/app  # Mount the current directory into the container (disabled for production)
+    volumes:
+      - .:/app  # Mount the current directory into the container (disabled for production)
     environment:
       FLASK_APP: app.py  # Flask app entry point
       FLASK_ENV: development  # Use development mode for local testing
