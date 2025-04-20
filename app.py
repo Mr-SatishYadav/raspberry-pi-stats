@@ -80,8 +80,8 @@ def get_stats():
         "disk_usage": psutil.disk_usage('/').percent,
         "temperature": f"{cpu_temp:.2f}" if isinstance(cpu_temp, (int, float)) else cpu_temp,
         "drive_temperature": drive_temp,
-        "upload_speed": f"{upload_speed/1024:.2f} KB/s",
-        "download_speed": f"{download_speed/1024:.2f} KB/s"
+        "upload_speed": f"{upload_speed/1024:.2f} KB/s" if upload_speed < 1048576 else f"{upload_speed/1048576:.2f} MB/s",
+        "download_speed": f"{download_speed/1024:.2f} KB/s" if download_speed < 1048576 else f"{download_speed/1048576:.2f} MB/s"
     }
 
 @app.route("/")

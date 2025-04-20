@@ -288,8 +288,11 @@ h1 {
 
 #net-widget .widget-content-right {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 100%;
+    height: 5.8rem;
 }
 
 .widget-content .widget-progress-wrapper {
@@ -352,4 +355,12 @@ h1 {
 
 .widget-content .widget-progress-wrapper .progress-sub-label .sub-label-right {
     margin-left: auto
+}
+
+.upload::after {
+    content: " ⬆️";
+}
+
+.download::after {
+    content: " ⬇️";
 }

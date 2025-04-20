@@ -34,9 +34,9 @@
                 [ 'temperature', 'temp', 'tmp-widget', 'temp-progress', [ 35, 45, 55 ] ],
                 [ 'memory_usage', 'memory', 'mem-widget', 'memory-progress', [ 60, 70, 90 ] ],
                 [ 'disk_usage', 'disk', 'dsk-widget', 'disk-progress', [ 70, 80, 90 ] ],
-                [ 'disk_temperature', 'drive-temp', 'drive-widget', 'drive-temp-progress', [ 40, 50, 60 ] ],
-                [ 'upload_speed', 'upload-speed', 'net-widget', 'upload-speed-progress', [ 25, 50, 75 ] ],
-                [ 'download_speed', 'download-speed', 'net-widget', 'download-speed-progress', [ 25, 50, 75 ] ]
+                [ 'drive_temperature', 'drive-temp', 'drive-widget', 'drive-temp-progress', [ 40, 50, 60 ] ],
+                [ 'upload_speed', 'upload-speed', 'net-widget', 'upload-speed-progress', null ],
+                [ 'download_speed', 'download-speed', 'net-widget', 'download-speed-progress', null ]
             ];
 
             // Cache DOM queries
@@ -53,16 +53,20 @@
                 const value = data[ key ];
                 const elem = elements[ i ];
                 if (value !== 'N/A') {
-                    const color = getColorClass(value, stats[ i ][ 4 ]);
+                    const color = stats[ i ][ 4 ] ? getColorClass(value, stats[ i ][ 4 ]) : '#d92550';
                     elem.card.style.display = 'unset';
-                    elem.progress.ariaValueNow = value;
-                    elem.progress.style.cssText = `width: ${ value }%; background-color: ${ color }`;
-                    elem.value.style.color = color;
+                    if (elem.progress) {
+                        elem.progress.ariaValueNow = value;
+                        elem.progress.style.cssText = `width: ${ value }%; background-color: ${ color }`;
+                        elem.value.style.color = color;
+                    }
                     // Show °C for temperature, % for others
-                    if (key === 'temperature') {
+                    if (key.includes('temp')) {
                         elem.value.textContent = value + '°C';
-                    } else {
+                    } else if (!key.includes('speed')) {
                         elem.value.textContent = value + '%';
+                    } else {
+                        elem.value.textContent = value;
                     }
                 } else {
                     elem.card.style.display = 'none';
@@ -229,9 +233,9 @@
                             <div class="widget-content-left">
                                 <div class="widget-heading">Network</div>
                             </div>
-                            <div class="widget-content-right" style="height: 5.8rem;">
-                                <div id='upload-speed' class="widget-numbers net-number">-</div>
-                                <div id='download-speed' class="widget-numbers net-number">-</div>
+                            <div class="widget-content-right">
+                                <div id='upload-speed' class="widget-numbers net-number upload">-</div>
+                                <div id='download-speed' class="widget-numbers net-number download">-</div>
                             </div>
                         </div>
                     </div>
