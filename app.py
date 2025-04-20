@@ -35,7 +35,7 @@ def get_drive_temp_and_usage(drive=None):
             )
             for line in result.stdout.splitlines():
                 if (
-                    "Temperature_Celsius" in line or
+                    "Airflow_Temperature_Cel" in line or
                     "Temperature_Internal" in line or
                     "Drive Temperature" in line
                 ):
@@ -47,16 +47,7 @@ def get_drive_temp_and_usage(drive=None):
                     break
         except Exception:
             temp = "N/A"
-    # Try to get usage for the drive (if mounted)
-    try:
-        partitions = psutil.disk_partitions()
-        for p in partitions:
-            if drive is not None and p.device == drive:
-                usage = psutil.disk_usage(p.mountpoint).percent
-                break
-    except Exception:
-        usage = "N/A"
-    return temp, usage
+    return temp
 
 def get_network_speeds():
     global prev_net
@@ -81,7 +72,7 @@ def get_stats():
         if p.device != 'C:\\':
             drive_letter = p.device
             break
-    drive_temp, drive_usage = get_drive_temp_and_usage(drive_letter)
+    drive_temp = get_drive_temp_and_usage(drive_letter)
     upload_speed, download_speed = get_network_speeds()
     return {
         "cpu_usage": psutil.cpu_percent(interval=1),
@@ -89,7 +80,6 @@ def get_stats():
         "disk_usage": psutil.disk_usage('/').percent,
         "temperature": f"{cpu_temp:.2f}" if isinstance(cpu_temp, (int, float)) else cpu_temp,
         "drive_temperature": drive_temp,
-        "drive_usage": drive_usage,
         "upload_speed": f"{upload_speed/1024:.2f} KB/s",
         "download_speed": f"{download_speed/1024:.2f} KB/s"
     }
