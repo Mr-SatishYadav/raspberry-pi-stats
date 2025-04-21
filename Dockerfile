@@ -1,6 +1,8 @@
 # Use an official Python image as the base
 FROM python:3.10-slim
 
+RUN apt-get update && apt-get install -y smartmontools && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1

@@ -14,15 +14,6 @@ def get_drive_temp_and_usage(drive=None):
     import os
     temp = "N/A"
     usage = "N/A"
-    # Find the first non-root, non-loop block device (e.g., /dev/sda, /dev/sdb)
-    if drive is None:
-        try:
-            for p in psutil.disk_partitions():
-                if p.device.startswith("/dev/sd") and p.device != "/dev/root":
-                    drive = p.device
-                    break
-        except Exception:
-            drive = None
     # Try to get drive temperature using smartctl (if available)
     if drive is not None and os.name == "posix":
         try:
@@ -67,11 +58,7 @@ def get_stats():
     temperatures = psutil.sensors_temperatures().get('cpu_thermal', [])
     cpu_temp = temperatures[0].current if temperatures else 'N/A'
     # Try to find a non-system drive (not C:) for Windows
-    drive_letter = None
-    for p in psutil.disk_partitions():
-        if p.device != 'C:\\':
-            drive_letter = p.device
-            break
+    drive_letter = "/dev/sda"
     drive_temp = get_drive_temp_and_usage(drive_letter)
     upload_speed, download_speed = get_network_speeds()
     return {
